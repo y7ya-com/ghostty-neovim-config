@@ -12,6 +12,7 @@ vim.opt.sidescrolloff = 8
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.mouse = "a"
+vim.opt.mousemodel = "extend"
 vim.opt.clipboard = "unnamedplus"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -27,6 +28,7 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 8
 vim.opt.fillchars = { eob = " " }
 vim.opt.laststatus = 0
+vim.opt.cmdheight = 0
 vim.opt.showmode = false
 vim.opt.title = true
 vim.opt.titlestring = "%F — nvim"
@@ -50,6 +52,8 @@ vim.opt.rtp:prepend(lazypath)
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = args.buf, desc = "LSP hover" })
+    -- gd = go to definition, gt = peek type definition in floating window
+    vim.keymap.set("n", "gt", function() vim.lsp.buf.type_definition() end, { buffer = args.buf, desc = "Go to type definition" })
   end,
 })
 
@@ -60,6 +64,25 @@ vim.keymap.set("n", "<RightMouse>", function()
   vim.lsp.buf.hover()
 end, { desc = "LSP hover on right-click" })
 
+
+-- Auto-reload files changed externally (e.g. by AI agents)
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("silent! checktime")
+    end
+  end,
+})
+
+-- Auto-save: on insert leave, focus lost, and 1s after stopping changes
+vim.api.nvim_create_autocmd({ "InsertLeave", "FocusLost", "TextChanged" }, {
+  callback = function()
+    if vim.bo.modified and vim.bo.buftype == "" and vim.fn.expand("%") ~= "" then
+      vim.cmd("silent! write")
+    end
+  end,
+})
 
 -- Show LSP diagnostics (red underlines) live while typing, not just on mode switch
 vim.diagnostic.config({ update_in_insert = true })
@@ -136,7 +159,22 @@ apply_nvimtree_colors()
 
 -- Keymaps: Ghostty uses kitty keyboard protocol, Neovim understands <D-...> (Cmd) natively
 -- Cmd+P → find files (Ghostty passes through via kitty protocol automatically)
+-- Cmd+click to go to definition
+vim.keymap.set("n", "<D-LeftMouse>", function()
+  local pos = vim.fn.getmousepos()
+  vim.api.nvim_set_current_win(pos.winid)
+  vim.api.nvim_win_set_cursor(pos.winid, { pos.line, pos.column - 1 })
+  vim.lsp.buf.definition()
+end, { desc = "Cmd+click go to definition" })
+
+-- Tab navigation
+vim.keymap.set("n", "<D-w>", "<cmd>bdelete<cr>", { desc = "Close tab" })
+vim.keymap.set("n", "<D-]>", "<cmd>BufferLineCycleNext<cr>", { desc = "Next tab" })
+vim.keymap.set("n", "<D-[>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Prev tab" })
+
 local all_modes = { "n", "i", "v" }
+vim.keymap.set(all_modes, "<D-z>", "<cmd>undo<cr>", { desc = "Undo (Cmd+Z)" })
+vim.keymap.set(all_modes, "<D-S-z>", "<cmd>redo<cr>", { desc = "Redo (Cmd+Shift+Z)" })
 vim.keymap.set(all_modes, "<D-p>", "<cmd>Telescope find_files<cr>", { desc = "Find files (Cmd+P)" })
 vim.keymap.set(all_modes, "<D-S-f>", "<cmd>FzfLua live_grep<cr>", { desc = "Live grep (Cmd+Shift+F)" })
 vim.keymap.set(all_modes, "<D-f>", "<cmd>Telescope current_buffer_fuzzy_find<cr>", { desc = "Search in file (Cmd+F)" })

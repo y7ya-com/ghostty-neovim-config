@@ -10,4 +10,7 @@ macos-titlebar-style = native
 keybind = super+f=text:\x1b[102;9u
 keybind = super+b=text:\x1b[98;9u
 keybind = super+shift+f=text:\x1b[70;10u
+keybind = super+z=text:\x1b[122;9u
+keybind = super+y=text:\x1b[121;9u
+keybind = super+shift+z=text:\x1b[122;10u
 # super+p has no Ghostty default — Ghostty forwards it via kitty protocol automatically

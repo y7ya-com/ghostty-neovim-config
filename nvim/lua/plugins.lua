@@ -32,6 +32,23 @@ local function context_menu(items, on_select)
 end
 
 return {
+  -- File tabs
+  {
+    "akinsho/bufferline.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {
+      options = {
+        offsets = {
+          { filetype = "NvimTree", text = "", padding = 1 },
+        },
+        show_buffer_close_icons = true,
+        show_close_icon = false,
+        separator_style = "thin",
+        diagnostics = "nvim_lsp",
+      },
+    },
+  },
+
   -- VSCode Dark Modern theme
   {
     "Mofiqul/vscode.nvim",
@@ -62,9 +79,9 @@ return {
           },
         },
       },
-      update_focused_file = {
-        enable = true,
-        update_root = false,
+      update_focused_file = { enable = true, update_root = false },
+      actions = {
+        change_dir = { enable = false },
       },
       on_attach = function(bufnr)
         local api = require("nvim-tree.api")
@@ -75,9 +92,9 @@ return {
           if node then api.node.open.edit() end
         end, { buffer = bufnr, nowait = true })
 
-        vim.keymap.set("n", "<S-RightMouse>", function()
+        local function show_context_menu()
           local pos = vim.fn.getmousepos()
-          vim.api.nvim_win_set_cursor(pos.winid, { pos.line, pos.column - 1 })
+          vim.api.nvim_win_set_cursor(pos.winid, { pos.line, 0 })
           local node = api.tree.get_node_under_cursor()
           if not node then return end
           context_menu(
@@ -94,7 +111,12 @@ return {
               end
             end
           )
-        end, { buffer = bufnr, nowait = true })
+        end
+
+        vim.keymap.set("n", "<RightMouse>", show_context_menu, { buffer = bufnr, nowait = true })
+        vim.keymap.set("n", "<S-RightMouse>", show_context_menu, { buffer = bufnr, nowait = true })
+        -- Disable double right-click cd (changes tree root to clicked folder)
+        vim.keymap.set("n", "<2-RightMouse>", function() end, { buffer = bufnr, nowait = true })
       end,
     },
   },
@@ -212,18 +234,31 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
     opts = {
-      ensure_installed = { "ts_ls", "tailwindcss" },
+      ensure_installed = { "tailwindcss" },
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      vim.lsp.config("ts_ls", {
-        capabilities = capabilities,
-        root_markers = { "tsconfig.json" },
-      })
       vim.lsp.config("tailwindcss", { capabilities = capabilities })
-      vim.lsp.enable({ "ts_ls", "tailwindcss" })
+      vim.lsp.enable({ "tailwindcss" })
     end,
+  },
+
+  -- TypeScript: typescript-tools replaces ts_ls with expanded type hover
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {
+      settings = {
+        expose_as_code_action = "all",
+        tsserver_file_preferences = {
+          includeInlayParameterNameHints = "all",
+          includeInlayVariableTypeHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          expandParameters = true,
+        },
+      },
+    },
   },
 
   -- Autocompletion
