@@ -83,6 +83,9 @@ return {
       actions = {
         change_dir = { enable = false },
       },
+      trash = {
+        cmd = "trash",
+      },
       on_attach = function(bufnr)
         local api = require("nvim-tree.api")
         api.config.mappings.default_on_attach(bufnr)
@@ -105,7 +108,7 @@ return {
               elseif choice == "Rename" then
                 api.fs.rename(node)
               elseif choice == "Delete" then
-                api.fs.remove(node)
+                api.fs.trash(node)
               elseif choice == "Copy path" then
                 api.fs.copy.absolute_path(node)
               end
