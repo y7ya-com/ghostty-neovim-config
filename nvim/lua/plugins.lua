@@ -13,13 +13,34 @@ return {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
-      view = { width = 35 },
+      view = { width = 30 },
       renderer = {
         group_empty = true,
+        root_folder_label = false,
+        highlight_git = true,
+        indent_markers = { enable = false },
         icons = {
-          show = { git = true },
+          show = { git = false, folder_arrow = true, file = true },
+          glyphs = {
+            folder = {
+              default = "󰉋",
+              open = "󰉋",
+            },
+          },
         },
       },
+      update_focused_file = {
+        enable = true,
+        update_root = false,
+      },
+      on_attach = function(bufnr)
+        local api = require("nvim-tree.api")
+        api.config.mappings.default_on_attach(bufnr)
+        vim.keymap.set("n", "<LeftRelease>", function()
+          local node = api.tree.get_node_under_cursor()
+          if node then api.node.open.edit() end
+        end, { buffer = bufnr, nowait = true })
+      end,
     },
   },
 

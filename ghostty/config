@@ -6,6 +6,6 @@ split-divider-color = #5a5a5a
 # Uses kitty keyboard protocol codepoints: f=102, e=101, F(shift+f)=70
 # Modifier: super=9, super+shift=10
 keybind = super+f=text:\x1b[102;9u
-keybind = super+e=text:\x1b[101;9u
+keybind = super+b=text:\x1b[98;9u
 keybind = super+shift+f=text:\x1b[70;10u
 # super+p has no Ghostty default — Ghostty forwards it via kitty protocol automatically
