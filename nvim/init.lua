@@ -6,6 +6,9 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Basic options
+vim.opt.wrap = false
+vim.opt.sidescroll = 1
+vim.opt.sidescrolloff = 8
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.mouse = "a"

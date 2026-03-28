@@ -1,0 +1,129 @@
+#!/usr/bin/env zsh
+# /opt/homebrew/bin/code — Ghostty AI session launcher
+#
+# Usage:
+#   code           Neovim (70%) | Claude Code (30%)
+#   code open      Neovim (70%) | OpenCode (30%)
+#   code both      OpenCode (20%) | Neovim (60%) | Claude Code (20%)
+#
+# If Ghostty is already open, opens as a new tab instead of a new window.
+
+MODE="${1:-}"
+DIR="${PWD}"
+# Single-quote-escape the path for use in shell commands typed into the terminal
+SAFE_DIR="${DIR//\'/\'\\\'\'}"
+
+# ── 1. Launch Ghostty or open a new tab ─────────────────────────────────────
+if pgrep -x Ghostty > /dev/null 2>&1; then
+  osascript \
+    -e 'tell application "Ghostty" to activate' \
+    -e 'tell application "System Events" to keystroke "t" using {command down}'
+  sleep 0.8
+else
+  open -na Ghostty.app
+  sleep 2.5
+fi
+
+# ── 2. Build layout via AppleScript keystrokes ───────────────────────────────
+# Cmd+D          = new_split:right
+# Cmd+[          = goto_split:previous
+# Cmd+Ctrl+Right = resize_split:right,10  (~4.5% per press on a 220-col terminal)
+# Cmd+Ctrl+Left  = resize_split:left,10
+
+case "$MODE" in
+
+  open)
+    # ── Neovim (70%) | OpenCode (30%) ────────────────────────────────────────
+    osascript <<APPLESCRIPT
+tell application "System Events"
+  tell process "Ghostty"
+    keystroke "cd '${SAFE_DIR}' && nvim ."
+    key code 36
+    delay 2.0
+    keystroke "d" using {command down}
+    delay 0.7
+    keystroke "cd '${SAFE_DIR}' && opencode"
+    key code 36
+    delay 0.3
+    -- Back to neovim, resize left pane to ~70%
+    keystroke "[" using {command down}
+    delay 0.2
+    repeat 4 times
+      key code 124 using {command down, control down}
+      delay 0.08
+    end repeat
+  end tell
+end tell
+APPLESCRIPT
+    ;;
+
+  both)
+    # ── OpenCode (20%) | Neovim (60%) | Claude (20%) ─────────────────────────
+    #
+    # Split tree after two right-splits:
+    #   pane1 (50%) | [ pane2 (25%) | pane3 (25%) ]
+    # From pane2: resize_split:left ×7  → pane1 shrinks to ~18%
+    # From pane2: resize_split:right ×4 → pane2 grows to ~60%
+    osascript <<APPLESCRIPT
+tell application "System Events"
+  tell process "Ghostty"
+    -- Pane 1: opencode
+    keystroke "cd '${SAFE_DIR}' && opencode"
+    key code 36
+    delay 0.8
+    -- Pane 2: nvim (split right from pane 1)
+    keystroke "d" using {command down}
+    delay 0.7
+    keystroke "cd '${SAFE_DIR}' && nvim ."
+    key code 36
+    delay 2.0
+    -- Pane 3: claude (split right from pane 2)
+    keystroke "d" using {command down}
+    delay 0.7
+    keystroke "claude"
+    key code 36
+    delay 0.4
+    -- Navigate back to pane 2 (nvim) to resize
+    keystroke "[" using {command down}
+    delay 0.2
+    -- Shrink pane1 by pulling its right divider left (×7 ≈ 32% shift)
+    repeat 7 times
+      key code 123 using {command down, control down}
+      delay 0.08
+    end repeat
+    -- Grow pane2 to the right (×4 ≈ 18% more)
+    repeat 4 times
+      key code 124 using {command down, control down}
+      delay 0.08
+    end repeat
+  end tell
+end tell
+APPLESCRIPT
+    ;;
+
+  *)
+    # ── Neovim (70%) | Claude Code (30%) ─────────────────────────────────────
+    osascript <<APPLESCRIPT
+tell application "System Events"
+  tell process "Ghostty"
+    keystroke "cd '${SAFE_DIR}' && nvim ."
+    key code 36
+    delay 2.0
+    keystroke "d" using {command down}
+    delay 0.7
+    keystroke "claude"
+    key code 36
+    delay 0.3
+    -- Back to neovim, resize left pane to ~70%
+    keystroke "[" using {command down}
+    delay 0.2
+    repeat 4 times
+      key code 124 using {command down, control down}
+      delay 0.08
+    end repeat
+  end tell
+end tell
+APPLESCRIPT
+    ;;
+
+esac
