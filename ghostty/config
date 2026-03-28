@@ -1,8 +1,8 @@
 theme = vscode-dark-modern
 unfocused-split-opacity = 1.0
 split-divider-color = #5a5a5a
-window-decoration = false
-macos-titlebar-style = hidden
+window-decoration = true
+macos-titlebar-style = native
 
 # Override Ghostty's default bindings to pass these keys through to Neovim
 # Uses kitty keyboard protocol codepoints: f=102, e=101, F(shift+f)=70

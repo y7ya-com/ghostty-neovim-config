@@ -70,7 +70,7 @@ return {
         local api = require("nvim-tree.api")
         api.config.mappings.default_on_attach(bufnr)
 
-        vim.keymap.set("n", "<LeftRelease>", function()
+        vim.keymap.set({ "n", "i", "v" }, "<LeftRelease>", function()
           local node = api.tree.get_node_under_cursor()
           if node then api.node.open.edit() end
         end, { buffer = bufnr, nowait = true })
