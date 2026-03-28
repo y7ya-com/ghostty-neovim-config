@@ -17,7 +17,7 @@ return {
       renderer = {
         group_empty = true,
         root_folder_label = false,
-        highlight_git = true,
+        highlight_git = "name",
         indent_markers = { enable = false },
         icons = {
           show = { git = false, folder_arrow = true, file = true },

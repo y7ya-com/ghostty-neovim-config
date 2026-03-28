@@ -87,12 +87,12 @@ vim.api.nvim_set_hl(0, "NvimTreeFolderName",          { fg = "#cccccc" })
 vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName",    { fg = "#cccccc" })
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker",        { fg = "#181818" })
 local function apply_nvimtree_colors()
-  local amber = "#ce9178"
-  local green = "#b5cea8"
+  local amber = "#e2c08d"   -- vscode git modified
+  local green = "#73c991"   -- vscode git untracked/added
   local gray  = "#858585"
   local bg    = "#181818"
-  local red   = "#f14c4c"
-  local dim   = "#4a4a4a"
+  local red   = "#c74e39"   -- vscode git deleted
+  local dim   = "#8c8c8c"   -- vscode git ignored
   local groups = {
     NvimTreeNormal              = { fg = gray,  bg = bg },
     NvimTreeNormalNC            = { fg = gray,  bg = bg },
@@ -102,23 +102,25 @@ local function apply_nvimtree_colors()
     NvimTreeFolderName          = { fg = "#cccccc" },
     NvimTreeOpenedFolderName    = { fg = "#ffffff", bold = true },
     NvimTreeIndentMarker        = { fg = bg },
+    NvimTreeFolderArrowClosed   = { fg = "#6b6b6b" },
+    NvimTreeFolderArrowOpen     = { fg = "#6b6b6b" },
+    NvimTreeFolderIcon          = { fg = "#569cd6" },  -- vscode blue
     NvimTreeOpenedFile          = { fg = "#ffffff", bold = true },
-    NvimTreeGitDirty            = { fg = amber },
-    NvimTreeGitStaged           = { fg = amber },
-    NvimTreeGitNew              = { fg = green },
-    NvimTreeGitUntracked        = { fg = green },
-    NvimTreeGitRenamed          = { fg = green },
-    NvimTreeGitDeleted          = { fg = red },
-    NvimTreeGitMerge            = { fg = red },
-    NvimTreeGitIgnored          = { fg = dim },
-    NvimTreeGitFileDirty        = { fg = amber },
-    NvimTreeGitFileStaged       = { fg = amber },
-    NvimTreeGitFileNew          = { fg = green },
-    NvimTreeGitFileUntracked    = { fg = green },
-    NvimTreeGitFileRenamed      = { fg = green },
-    NvimTreeGitFileDeleted      = { fg = red },
-    NvimTreeGitFileMerge        = { fg = red },
-    NvimTreeGitFileIgnored      = { fg = dim },
+    -- These *HL groups are what nvim-tree actually uses for filename coloring
+    NvimTreeGitFileDirtyHL      = { fg = amber },
+    NvimTreeGitFileStagedHL     = { fg = amber },
+    NvimTreeGitFileNewHL        = { fg = green },
+    NvimTreeGitFileRenamedHL    = { fg = green },
+    NvimTreeGitFileDeletedHL    = { fg = red },
+    NvimTreeGitFileMergeHL      = { fg = red },
+    NvimTreeGitFileIgnoredHL    = { fg = dim },
+    NvimTreeGitFolderDirtyHL    = { fg = amber },
+    NvimTreeGitFolderStagedHL   = { fg = amber },
+    NvimTreeGitFolderNewHL      = { fg = green },
+    NvimTreeGitFolderRenamedHL  = { fg = green },
+    NvimTreeGitFolderDeletedHL  = { fg = red },
+    NvimTreeGitFolderMergeHL    = { fg = red },
+    NvimTreeGitFolderIgnoredHL  = { fg = dim },
   }
   for group, opts in pairs(groups) do
     vim.api.nvim_set_hl(0, group, opts)
