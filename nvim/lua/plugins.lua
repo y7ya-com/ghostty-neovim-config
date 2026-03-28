@@ -1,3 +1,36 @@
+local function context_menu(items, on_select)
+  local width = 0
+  for _, item in ipairs(items) do width = math.max(width, #item + 4) end
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.tbl_map(function(i) return "  " .. i end, items))
+  vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "mouse", row = 1, col = 0,
+    width = width, height = #items,
+    style = "minimal", border = "rounded",
+  })
+  vim.api.nvim_set_option_value("cursorline", true, { win = win })
+  vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:NvimTreeCursorLine", { win = win })
+  local function pick()
+    local line = vim.api.nvim_win_get_cursor(win)[1]
+    vim.api.nvim_win_close(win, true)
+    on_select(items[line])
+  end
+  local function close() vim.api.nvim_win_close(win, true) end
+  for _, lhs in ipairs({ "<CR>", "<LeftRelease>" }) do
+    vim.keymap.set("n", lhs, pick, { buffer = buf, nowait = true })
+  end
+  for _, lhs in ipairs({ "<Esc>", "q", "<S-RightMouse>" }) do
+    vim.keymap.set("n", lhs, close, { buffer = buf, nowait = true })
+  end
+  vim.api.nvim_create_autocmd("BufLeave", {
+    buffer = buf, once = true,
+    callback = function()
+      if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
+    end,
+  })
+end
+
 return {
   -- VSCode Dark Modern theme
   {
@@ -36,9 +69,31 @@ return {
       on_attach = function(bufnr)
         local api = require("nvim-tree.api")
         api.config.mappings.default_on_attach(bufnr)
+
         vim.keymap.set("n", "<LeftRelease>", function()
           local node = api.tree.get_node_under_cursor()
           if node then api.node.open.edit() end
+        end, { buffer = bufnr, nowait = true })
+
+        vim.keymap.set("n", "<S-RightMouse>", function()
+          local pos = vim.fn.getmousepos()
+          vim.api.nvim_win_set_cursor(pos.winid, { pos.line, pos.column - 1 })
+          local node = api.tree.get_node_under_cursor()
+          if not node then return end
+          context_menu(
+            { "New file / folder", "Rename", "Delete", "Copy path" },
+            function(choice)
+              if choice == "New file / folder" then
+                api.fs.create(node)
+              elseif choice == "Rename" then
+                api.fs.rename(node)
+              elseif choice == "Delete" then
+                api.fs.remove(node)
+              elseif choice == "Copy path" then
+                api.fs.copy.absolute_path(node)
+              end
+            end
+          )
         end, { buffer = bufnr, nowait = true })
       end,
     },

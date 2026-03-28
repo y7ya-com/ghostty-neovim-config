@@ -94,8 +94,9 @@ local function apply_nvimtree_colors()
   local red   = "#c74e39"   -- vscode git deleted
   local dim   = "#8c8c8c"   -- vscode git ignored
   local groups = {
-    NvimTreeNormal              = { fg = gray,  bg = bg },
-    NvimTreeNormalNC            = { fg = gray,  bg = bg },
+    NvimTreeNormal              = { fg = "#cccccc", bg = bg },
+    NvimTreeNormalNC            = { fg = "#cccccc", bg = bg },
+    NvimTreeSpecialFile         = { fg = "#cccccc" },  -- remove pink underline
     NvimTreeEndOfBuffer         = { bg = bg },
     NvimTreeWinSeparator        = { fg = bg, bg = bg },
     NvimTreeCursorLine          = { bg = "#37373d" },
