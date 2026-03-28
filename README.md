@@ -1,6 +1,6 @@
 # nvim-config
 
-Neovim + Ghostty config for TypeScript/SolidJS development on macOS.
+Neovim + Ghostty config for macOS.
 
 ## LLM prompt
 
